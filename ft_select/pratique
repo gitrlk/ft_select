@@ -1,0 +1,16 @@
+
++++++  yakwa dans ma liste ? +++++
+
+	while (arglist)
+	{
+		ft_putendl(arglist->name);
+		ft_putstr("LEN IS : ");
+		ft_putnbr(arglist->len);
+		ft_putchar('\n');
+		ft_putstr("POSITION IS : ");
+		ft_putnbr(arglist->pos);
+		ft_putchar('\n');
+		arglist = arglist->next;
+		}
+
++++++
