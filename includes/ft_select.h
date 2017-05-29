@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/17 18:13:26 by jecarol           #+#    #+#             */
-/*   Updated: 2017/05/25 21:29:42 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/05/27 19:25:12 by rlkcmptr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ typedef	struct			s_args
 	char				*name;
 	size_t				len;
 	int					pos;
+	int					sel;
 	struct s_args		*next;
 }						t_args;
 

@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/25 17:57:15 by jecarol           #+#    #+#             */
-/*   Updated: 2017/05/25 21:33:30 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/05/28 14:41:17 by rlkcmptr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ t_args					*ft_addarg(char *av)
 		tmp->name = ft_strdup(av);
 		tmp->len = ft_strlen(av);
 		tmp->pos = pos;
+		tmp->sel = 0;
 		pos++;
 	}
 	return (tmp);
@@ -82,7 +83,11 @@ void					ft_print(t_args *arglist, t_vals *values)
 	{
 		if (values->curr == tmp->pos)
 			ft_putstr("\033[4m");
+		if (tmp->sel == 1)
+			ft_putstr("\e[7m");
 		ft_putstr(tmp->name);
+		if (tmp->sel == 1)
+			ft_putstr("\e[27m");
 		if (values->curr == tmp->pos)
 			ft_putstr("\033[24m");
 		values->lin_pos += 1;
@@ -91,6 +96,20 @@ void					ft_print(t_args *arglist, t_vals *values)
 		tmp = tmp->next;
 	}
 	values->lin_pos = 0;
+}
+
+void					ft_toggle_sel(t_args *arglist, t_vals *values)
+{
+	t_args				*tmp;
+
+	tmp = arglist;
+	while (tmp)
+	{
+		if (tmp->pos == values->curr)
+			tmp->sel = 1;
+		tmp = tmp->next;
+	}
+	values->curr += 1;
 }
 
 void					ft_movement(t_args *arglist, int buf, t_term *setup, t_vals *values)
@@ -102,6 +121,20 @@ void					ft_movement(t_args *arglist, int buf, t_term *setup, t_vals *values)
 		if (values->curr == values->count)
 			values->curr = 0;
 		ft_print(arglist, values);
+	}
+	if (buf == 4283163)
+	{
+		if (values->curr == 0)
+			values->curr = values->count;
+		values->curr -= 1;
+		ft_print(arglist, values);
+	}
+	if (buf == 32)
+	{
+		ft_toggle_sel(arglist, values);
+		ft_print(arglist, values);
+		if (values->curr == values->count)
+			values->curr = 0;
 	}
 }
 
@@ -116,8 +149,8 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 	values = ft_memalloc(sizeof(t_vals));
 	values->col_pos = 0;
 	values->lin_pos = 0;
-	ft_getmax(arglist, values);
 	values->curr = 0;
+	ft_getmax(arglist, values);
 	tputs(tgoto(tgetstr("cm", NULL), 0, 0), 1, ft_pointchar);
 	ft_print(arglist, values);
 	while (42)
@@ -126,8 +159,29 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 		tputs(tgetstr("cl", NULL), 1, ft_pointchar);
 		values->col_pos = 0;
 		ft_movement(arglist, buf, setup, values);
+		buf = 0;
 	}
 }
+
+// void					ft_waddup(void)
+// {
+// 	ft_putendl("         ,--,                                ,----,
+//                       ,---.'|                              ,/   .`|
+//   .--.--.       ,---,.|   | :       ,---,.  ,----..      ,`   .'  :
+//  /  /    '.   ,'  .' |:   : |     ,'  .' | /   /  \\   ;    ;     /
+// |  :  /`. / ,---.'   ||   ' :   ,---.'   ||   :     :.'___,/    ,'
+// ;  |  |--`  |   |   .';   ; '   |   |   .'.   |  ;. /|    :     |
+// |  :  ;_    :   :  |-,'   | |__ :   :  |-,.   ; /--` ;    |.';  ;
+// \\ \\    `. :   |  ;/||   | :.'|:   |  ;/|;   | ;    `----'  |  |
+//   `----.  \\|   :   .''   :    ;|   :   .'|   : |        '   :  ;
+//   __\\ \\  ||   |  |-,|   |  ./ |   |  |-,.   | '___     |   |  '
+//  /  /`--'  /'   :  ;/|;   : ;   '   :  ;/|'   ; : .'|    '   :  |
+// '--'.     / |   |   \\|   ,/    |   |   \\'   | '/  :    ;   |.'
+//   `--'---'  |   :   .''---'     |   :   .'|   :    /     '---'
+//             |   | ,'            |   | ,'  \\  \\ .'
+//             `----'              `----'      `---`
+//                                                                     ");
+// }
 
 void					ft_init(char *orterm, t_term *setup, t_args *arglist)
 {
@@ -146,6 +200,7 @@ void					ft_init(char *orterm, t_term *setup, t_args *arglist)
 	setup->height = tgetnum("li");
  	setup->width = tgetnum("co");
 	setup->to_sub = setup->width;
+	// ft_wad	dup();
 	ft_display_loop(arglist, setup);
 }
 
