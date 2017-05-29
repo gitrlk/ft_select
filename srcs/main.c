@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/25 17:57:15 by jecarol           #+#    #+#             */
-/*   Updated: 2017/05/29 17:57:03 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/05/29 18:43:48 by jecarol          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,11 +74,35 @@ void					ft_getmax(t_args *arglist, t_vals *values)
 	values->max = max;
 }
 
-void					ft_print(t_args *arglist, t_vals *values)
+void					ft_waddup(void)
+{
+	ft_putendl("                         ,--,                                ,----,");
+    ft_putendl("                      ,---.'|                              ,/   .`|");
+	ft_putendl("  .--.--.       ,---,.|   | :       ,---,.  ,----..      ,`   .'  :");
+	ft_putendl(" /  /    '.   ,'  .' |:   : |     ,'  .' | /   /  \\    ;    ;     /");
+	ft_putendl("|  :  /`. / ,---.'   ||   ' :   ,---.'   ||   :     :.'___,/    ,'");
+	ft_putendl(";  |  |--`  |   |   .';   ; '   |   |   .'.   |  ;. /|    :     |");
+	ft_putendl("|  :  ;_    :   :  |-,'   | |__ :   :  |-,.   ; /--` ;    |.';  ;");
+	ft_putendl(" \\  \\    `. :   |  ;/||   | :.'|:   |  ;/|;   | ;    `----'  |  |");
+	ft_putendl("  `----.   \\|   :   .''   :    ;|   :   .'|   : |        '   :  ;");
+	ft_putendl("    __\\ \\  ||   |  |-,|   |  ./ |   |  |-,.   | '___     |   |  '");
+    ft_putendl(" /  /`--'  /'   :  ;/|;   : ;   '   :  ;/|'   ; : .'|    '   :  |");
+	ft_putendl("'--'.     / |   |    \\|   ,/    |   |    \\'   | '/  :    ;   |.'");
+  	ft_putendl("  `--'---'  |   :   .''---'     |   :   .'|   :    /     '---'");
+  	ft_putendl("            |   | ,'            |   | ,'   \\  \\  .'");
+	ft_putendl("            `----'              `----'      `---`");
+}
+
+void					ft_print(t_args *arglist, t_vals *values, t_term *setup)
 {
 	t_args				*tmp;
 
 	tmp = arglist;
+	if (setup->width > 65)
+	{
+		ft_waddup();
+		tputs(tgoto(tgetstr("cm", NULL), 0, 17), 1, ft_pointchar);
+	}
 	while (tmp)
 	{
 		if (values->curr == tmp->pos)
@@ -92,7 +116,11 @@ void					ft_print(t_args *arglist, t_vals *values)
 		1, ft_pointchar);
 		tmp = tmp->next;
 	}
-	values->lin_pos = 0;
+	if (setup->width > 65)
+		values->lin_pos = 17;
+	else
+		values->lin_pos = 0;
+
 }
 
 void					ft_toggle_sel(t_args *arglist, t_vals *values)
@@ -119,21 +147,21 @@ void					ft_movement(t_args *arglist, int buf, t_term *setup, t_vals *values)
 		values->curr += 1;
 		if (values->curr == values->count)
 			values->curr = 0;
-		ft_print(arglist, values);
+		ft_print(arglist, values, setup);
 	}
 	if (buf == 4283163)
 	{
 		if (values->curr == 0)
 			values->curr = values->count;
 		values->curr -= 1;
-		ft_print(arglist, values);
+		ft_print(arglist, values, setup);
 	}
 	if (buf == 32)
 	{
 		ft_toggle_sel(arglist, values);
 		if (values->curr == values->count)
 			values->curr = 0;
-		ft_print(arglist, values);
+		ft_print(arglist, values, setup);
 	}
 	if (buf == 10)
 	{
@@ -160,15 +188,17 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 	t_vals				*values;
 
 	i = 0;
-	(void)setup;
 	values = ft_memalloc(sizeof(t_vals));
 	values->col_pos = 0;
-	values->lin_pos = 0;
+	if (setup->width > 65)
+		values->lin_pos = 17;
+	else
+		values->lin_pos = 0;
 	values->curr = 0;
 	ft_getmax(arglist, values);
 	tputs(tgetstr("ti", NULL), 0, ft_pointchar);
 	tputs(tgoto(tgetstr("cm", NULL), 0, 0), 1, ft_pointchar);
-	ft_print(arglist, values);
+	ft_print(arglist, values, setup);
 	while (42)
 	{
 		read(0, &buf, 8);
@@ -179,31 +209,10 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 	}
 }
 
-// void					ft_waddup(void)
-// {
-// 	ft_putendl("                         ,--,                                ,----,");
-//     ft_putendl("                      ,---.'|                              ,/   .`|");
-// 	ft_putendl("  .--.--.       ,---,.|   | :       ,---,.  ,----..      ,`   .'  :");
-// 	ft_putendl(" /  /    '.   ,'  .' |:   : |     ,'  .' | /   /  \\    ;    ;     /");
-// 	ft_putendl("|  :  /`. / ,---.'   ||   ' :   ,---.'   ||   :     :.'___,/    ,'");
-// 	ft_putendl(";  |  |--`  |   |   .';   ; '   |   |   .'.   |  ;. /|    :     |");
-// 	ft_putendl("|  :  ;_    :   :  |-,'   | |__ :   :  |-,.   ; /--` ;    |.';  ;");
-// 	ft_putendl(" \\  \\    `. :   |  ;/||   | :.'|:   |  ;/|;   | ;    `----'  |  |");
-// 	ft_putendl("  `----.   \\|   :   .''   :    ;|   :   .'|   : |        '   :  ;");
-// 	ft_putendl("    __\\ \\  ||   |  |-,|   |  ./ |   |  |-,.   | '___     |   |  '");
-//     ft_putendl(" /  /`--'  /'   :  ;/|;   : ;   '   :  ;/|'   ; : .'|    '   :  |");
-// 	ft_putendl("'--'.     / |   |    \\|   ,/    |   |    \\'   | '/  :    ;   |.'");
-//   	ft_putendl("  `--'---'  |   :   .''---'     |   :   .'|   :    /     '---'");
-//   	ft_putendl("            |   | ,'            |   | ,'   \\  \\  .'");
-// 	ft_putendl("            `----'              `----'      `---`");
-// }
-
 void					ft_init(char *orterm, t_term *setup, t_args *arglist)
 {
 	int					retoor;
-	char				buf[4];
 
-	ft_bzero(buf, 4);
 	if ((retoor = tgetent(NULL, orterm) < 0))
 		ft_putendl_fd("error", 2);
 	tcgetattr(0, &setup->attributes);
@@ -215,7 +224,6 @@ void					ft_init(char *orterm, t_term *setup, t_args *arglist)
 	setup->height = tgetnum("li");
  	setup->width = tgetnum("co");
 	setup->to_sub = setup->width;
-	// ft_waddup();
 	ft_display_loop(arglist, setup);
 }
 
