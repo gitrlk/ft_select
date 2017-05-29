@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/25 17:57:15 by jecarol           #+#    #+#             */
-/*   Updated: 2017/05/28 14:41:17 by rlkcmptr         ###   ########.fr       */
+/*   Updated: 2017/05/29 17:57:03 by jecarol          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,14 +82,11 @@ void					ft_print(t_args *arglist, t_vals *values)
 	while (tmp)
 	{
 		if (values->curr == tmp->pos)
-			ft_putstr("\033[4m");
+			ft_putstr_fd(tgetstr("us", NULL), 0);
 		if (tmp->sel == 1)
-			ft_putstr("\e[7m");
-		ft_putstr(tmp->name);
-		if (tmp->sel == 1)
-			ft_putstr("\e[27m");
-		if (values->curr == tmp->pos)
-			ft_putstr("\033[24m");
+			ft_putstr_fd(tgetstr("mr", NULL), 0);
+		ft_putstr_fd(tmp->name, 0);
+		ft_putstr_fd(tgetstr("me", NULL), 0);
 		values->lin_pos += 1;
 		tputs(tgoto(tgetstr("cm", NULL), values->col_pos, values->lin_pos),
 		1, ft_pointchar);
@@ -105,8 +102,10 @@ void					ft_toggle_sel(t_args *arglist, t_vals *values)
 	tmp = arglist;
 	while (tmp)
 	{
-		if (tmp->pos == values->curr)
+		if (tmp->pos == values->curr && tmp->sel == 0)
 			tmp->sel = 1;
+		else if (tmp->pos == values->curr && tmp->sel == 1)
+			tmp->sel = 0;
 		tmp = tmp->next;
 	}
 	values->curr += 1;
@@ -132,9 +131,25 @@ void					ft_movement(t_args *arglist, int buf, t_term *setup, t_vals *values)
 	if (buf == 32)
 	{
 		ft_toggle_sel(arglist, values);
-		ft_print(arglist, values);
 		if (values->curr == values->count)
 			values->curr = 0;
+		ft_print(arglist, values);
+	}
+	if (buf == 10)
+	{
+		while (arglist)
+		{
+			if (arglist->sel == 1)
+			{
+				ft_putstr_fd(arglist->name, 1);
+				ft_putstr_fd(" ", 1);
+			}
+			arglist = arglist->next;
+		}
+		ft_putchar('\n');
+		tputs(tgetstr("ve", NULL), 0, ft_pointchar);
+		// tputs(tgetstr("te", NULL), 0, ft_pointchar);
+		exit(EXIT_SUCCESS);
 	}
 }
 
@@ -151,11 +166,12 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 	values->lin_pos = 0;
 	values->curr = 0;
 	ft_getmax(arglist, values);
+	tputs(tgetstr("ti", NULL), 0, ft_pointchar);
 	tputs(tgoto(tgetstr("cm", NULL), 0, 0), 1, ft_pointchar);
 	ft_print(arglist, values);
 	while (42)
 	{
-		read(1, &buf, 8);
+		read(0, &buf, 8);
 		tputs(tgetstr("cl", NULL), 1, ft_pointchar);
 		values->col_pos = 0;
 		ft_movement(arglist, buf, setup, values);
@@ -165,22 +181,21 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 
 // void					ft_waddup(void)
 // {
-// 	ft_putendl("         ,--,                                ,----,
-//                       ,---.'|                              ,/   .`|
-//   .--.--.       ,---,.|   | :       ,---,.  ,----..      ,`   .'  :
-//  /  /    '.   ,'  .' |:   : |     ,'  .' | /   /  \\   ;    ;     /
-// |  :  /`. / ,---.'   ||   ' :   ,---.'   ||   :     :.'___,/    ,'
-// ;  |  |--`  |   |   .';   ; '   |   |   .'.   |  ;. /|    :     |
-// |  :  ;_    :   :  |-,'   | |__ :   :  |-,.   ; /--` ;    |.';  ;
-// \\ \\    `. :   |  ;/||   | :.'|:   |  ;/|;   | ;    `----'  |  |
-//   `----.  \\|   :   .''   :    ;|   :   .'|   : |        '   :  ;
-//   __\\ \\  ||   |  |-,|   |  ./ |   |  |-,.   | '___     |   |  '
-//  /  /`--'  /'   :  ;/|;   : ;   '   :  ;/|'   ; : .'|    '   :  |
-// '--'.     / |   |   \\|   ,/    |   |   \\'   | '/  :    ;   |.'
-//   `--'---'  |   :   .''---'     |   :   .'|   :    /     '---'
-//             |   | ,'            |   | ,'  \\  \\ .'
-//             `----'              `----'      `---`
-//                                                                     ");
+// 	ft_putendl("                         ,--,                                ,----,");
+//     ft_putendl("                      ,---.'|                              ,/   .`|");
+// 	ft_putendl("  .--.--.       ,---,.|   | :       ,---,.  ,----..      ,`   .'  :");
+// 	ft_putendl(" /  /    '.   ,'  .' |:   : |     ,'  .' | /   /  \\    ;    ;     /");
+// 	ft_putendl("|  :  /`. / ,---.'   ||   ' :   ,---.'   ||   :     :.'___,/    ,'");
+// 	ft_putendl(";  |  |--`  |   |   .';   ; '   |   |   .'.   |  ;. /|    :     |");
+// 	ft_putendl("|  :  ;_    :   :  |-,'   | |__ :   :  |-,.   ; /--` ;    |.';  ;");
+// 	ft_putendl(" \\  \\    `. :   |  ;/||   | :.'|:   |  ;/|;   | ;    `----'  |  |");
+// 	ft_putendl("  `----.   \\|   :   .''   :    ;|   :   .'|   : |        '   :  ;");
+// 	ft_putendl("    __\\ \\  ||   |  |-,|   |  ./ |   |  |-,.   | '___     |   |  '");
+//     ft_putendl(" /  /`--'  /'   :  ;/|;   : ;   '   :  ;/|'   ; : .'|    '   :  |");
+// 	ft_putendl("'--'.     / |   |    \\|   ,/    |   |    \\'   | '/  :    ;   |.'");
+//   	ft_putendl("  `--'---'  |   :   .''---'     |   :   .'|   :    /     '---'");
+//   	ft_putendl("            |   | ,'            |   | ,'   \\  \\  .'");
+// 	ft_putendl("            `----'              `----'      `---`");
 // }
 
 void					ft_init(char *orterm, t_term *setup, t_args *arglist)
@@ -191,16 +206,16 @@ void					ft_init(char *orterm, t_term *setup, t_args *arglist)
 	ft_bzero(buf, 4);
 	if ((retoor = tgetent(NULL, orterm) < 0))
 		ft_putendl_fd("error", 2);
-	tcgetattr(1, &setup->attributes);
+	tcgetattr(0, &setup->attributes);
 	setup->attributes.c_lflag &= ~ICANON;
 	setup->attributes.c_lflag &= ~ECHO;
-	tcsetattr(1, TCSADRAIN, &setup->attributes);
+	tcsetattr(0, TCSADRAIN, &setup->attributes);
 	tputs(tgetstr("cl", NULL), 1, ft_pointchar);
-	// tputs(tgetstr("vi", NULL), 1, ft_pointchar);
+	tputs(tgetstr("vi", NULL), 1, ft_pointchar);
 	setup->height = tgetnum("li");
  	setup->width = tgetnum("co");
 	setup->to_sub = setup->width;
-	// ft_wad	dup();
+	// ft_waddup();
 	ft_display_loop(arglist, setup);
 }
 
