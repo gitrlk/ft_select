@@ -6,11 +6,25 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/25 17:57:15 by jecarol           #+#    #+#             */
-/*   Updated: 2017/05/30 15:32:50 by rlkcmptr         ###   ########.fr       */
+/*   Updated: 2017/05/30 20:22:28 by jecarol          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_select.h"
+
+void			ft_freelist(t_args *lst)
+{
+	t_args		*tmp;
+
+	tmp = lst;
+	while (lst)
+	{
+		tmp = lst;
+		lst = lst->next;
+		ft_strdel(&tmp->name);
+		free(tmp);
+	}
+}
 
 t_args					*ft_addarg(char *av)
 {
@@ -111,6 +125,28 @@ void					ft_waddup(void)
 	ft_putendl_fd("            `----'              `----'      `---`", 0);
 }
 
+void					ft_padder(t_vals *values, t_term *setup)
+{
+	if (values->lin_pos == setup->height && setup->width > 65)
+	{
+		values->col_pos += values->max + 3;
+		values->lin_pos = 17;
+	}
+	else if (values->lin_pos == setup->height)
+	{
+		values->col_pos += values->max + 3;
+		values->lin_pos = 0;
+	}
+}
+
+void					ft_print_more(t_term *setup, t_vals *values)
+{
+	if (setup->width > 65)
+		values->lin_pos = 17;
+	else
+		values->lin_pos = 0;
+}
+
 void					ft_print(t_args *arglist, t_vals *values, t_term *setup)
 {
 	t_args				*tmp;
@@ -130,19 +166,12 @@ void					ft_print(t_args *arglist, t_vals *values, t_term *setup)
 		ft_putstr_fd(tmp->name, 0);
 		ft_putstr_fd(tgetstr("me", NULL), 0);
 		values->lin_pos += 1;
-		if (values->lin_pos == setup->height)
-		{
-			values->col_pos += values->max + 3;
-			values->lin_pos = 17;
-		}
+		ft_padder(values, setup);
 		tputs(tgoto(tgetstr("cm", NULL), values->col_pos, values->lin_pos),
 		1, ft_pointchar);
 		tmp = tmp->next;
 	}
-	if (setup->width > 65)
-		values->lin_pos = 17;
-	else
-		values->lin_pos = 0;
+	ft_print_more(setup, values);
 }
 
 void					ft_toggle_sel(t_args *arglist, t_vals *values)
@@ -210,11 +239,17 @@ void					ft_end(t_args *arglist, int buf, t_term *setup,
 		}
 		ft_putchar('\n');
 		tputs(tgetstr("ve", NULL), 0, ft_pointchar);
+		ft_freelist(arglist);
+		free(setup);
+		free(values);
 		// tputs(tgetstr("te", NULL), 0, ft_pointchar);
 		exit(EXIT_SUCCESS);
 	}
 	if (buf == 27)
 	{
+		free(setup);
+		free(values);
+ 		ft_freelist(arglist);
 		tputs(tgetstr("ve", NULL), 0, ft_pointchar);
 		exit(EXIT_SUCCESS);
 	}
@@ -235,6 +270,7 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 	t_vals				*values;
 
 	i = 0;
+	buf = 0;
 	values = ft_memalloc(sizeof(t_vals));
 	values->col_pos = 0;
 	if (setup->width > 65)
