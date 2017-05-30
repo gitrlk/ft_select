@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/25 17:57:15 by jecarol           #+#    #+#             */
-/*   Updated: 2017/05/30 20:22:28 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/05/30 20:23:14 by jecarol          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,8 +224,6 @@ void					ft_select_elem(t_args *arglist, int buf, t_term *setup,
 void					ft_end(t_args *arglist, int buf, t_term *setup,
 						t_vals *values)
 {
-	(void)values;
-	(void)setup;
 	if (buf == 10)
 	{
 		while (arglist)
