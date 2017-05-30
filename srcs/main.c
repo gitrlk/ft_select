@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/25 17:57:15 by jecarol           #+#    #+#             */
-/*   Updated: 2017/05/29 18:57:29 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/05/30 15:32:50 by rlkcmptr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,21 +74,39 @@ void					ft_getmax(t_args *arglist, t_vals *values)
 	values->max = max;
 }
 
+void					ft_waddup_more(void)
+{
+	ft_putstr_fd("                         ", 0);
+	ft_putendl_fd(",--,                                ,----,", 0);
+    ft_putstr_fd("                      ", 0);
+	ft_putendl_fd(",---.'|                              ,/   .`|", 0);
+	ft_putstr_fd("  .--.--.       ,---,.|   | :       ", 0);
+	ft_putendl_fd(",---,.  ,----..      ,`   .'  :", 0);
+	ft_putstr_fd(" /  /    '.   ,'  .' |:   : |     ", 0);
+	ft_putendl_fd(",'  .' | /   /  \\    ;    ;     /", 0);
+	ft_putstr_fd("|  :  /`. / ,---.'   ||   ' :   ", 0);
+	ft_putendl_fd(",---.'   ||   :     :.'___,/    ,'", 0);
+	ft_putstr_fd(";  |  |--`  |   |   .';   ; '   ", 0);
+	ft_putendl_fd("|   |   .'.   |  ;. /|    :     |", 0);
+	ft_putstr_fd("|  :  ;_    :   :  |-,'   | |__ :   ", 0);
+	ft_putendl_fd(":  |-,.   ; /--` ;    |.';  ;", 0);
+	ft_putstr_fd(" \\  \\    `. :   |  ;/||   | :.'|", 0);
+}
+
 void					ft_waddup(void)
 {
-	ft_putendl_fd("                         ,--,                                ,----,", 0);
-    ft_putendl_fd("                      ,---.'|                              ,/   .`|", 0);
-	ft_putendl_fd("  .--.--.       ,---,.|   | :       ,---,.  ,----..      ,`   .'  :", 0);
-	ft_putendl_fd(" /  /    '.   ,'  .' |:   : |     ,'  .' | /   /  \\    ;    ;     /", 0);
-	ft_putendl_fd("|  :  /`. / ,---.'   ||   ' :   ,---.'   ||   :     :.'___,/    ,'", 0);
-	ft_putendl_fd(";  |  |--`  |   |   .';   ; '   |   |   .'.   |  ;. /|    :     |", 0);
-	ft_putendl_fd("|  :  ;_    :   :  |-,'   | |__ :   :  |-,.   ; /--` ;    |.';  ;", 0);
-	ft_putendl_fd(" \\  \\    `. :   |  ;/||   | :.'|:   |  ;/|;   | ;    `----'  |  |", 0);
-	ft_putendl_fd("  `----.   \\|   :   .''   :    ;|   :   .'|   : |        '   :  ;", 0);
-	ft_putendl_fd("    __\\ \\  ||   |  |-,|   |  ./ |   |  |-,.   | '___     |   |  '", 0);
-    ft_putendl_fd(" /  /`--'  /'   :  ;/|;   : ;   '   :  ;/|'   ; : .'|    '   :  |", 0);
-	ft_putendl_fd("'--'.     / |   |    \\|   ,/    |   |    \\'   | '/  :    ;   |.'", 0);
-  	ft_putendl_fd("  `--'---'  |   :   .''---'     |   :   .'|   :    /     '---'", 0);
+	ft_waddup_more();
+	ft_putendl_fd(":   |  ;/|;   | ;    `----'  |  |", 0);
+	ft_putstr_fd("  `----.   \\|   :   .''   :    ", 0);
+	ft_putendl_fd(";|   :   .'|   : |        '   :  ;", 0);
+	ft_putstr_fd("    __\\ \\  ||   |  |-,|   |  ", 0);
+	ft_putendl_fd("./ |   |  |-,.   | '___     |   |  '", 0);
+    ft_putstr_fd(" /  /`--'  /'   :  ;/|;   : ;   '   :  ", 0);
+	ft_putendl_fd(";/|'   ; : .'|    '   :  |", 0);
+	ft_putstr_fd("'--'.     / |   |    \\|   ,/    ", 0);
+	ft_putendl_fd("|   |    \\'   | '/  :    ;   |.'", 0);
+  	ft_putstr_fd("  `--'---'  |   :   .''---'     ", 0);
+	ft_putendl_fd("|   :   .'|   :    /     '---'", 0);
   	ft_putendl_fd("            |   | ,'            |   | ,'   \\  \\  .'", 0);
 	ft_putendl_fd("            `----'              `----'      `---`", 0);
 }
@@ -112,6 +130,11 @@ void					ft_print(t_args *arglist, t_vals *values, t_term *setup)
 		ft_putstr_fd(tmp->name, 0);
 		ft_putstr_fd(tgetstr("me", NULL), 0);
 		values->lin_pos += 1;
+		if (values->lin_pos == setup->height)
+		{
+			values->col_pos += values->max + 3;
+			values->lin_pos = 17;
+		}
 		tputs(tgoto(tgetstr("cm", NULL), values->col_pos, values->lin_pos),
 		1, ft_pointchar);
 		tmp = tmp->next;
@@ -120,7 +143,6 @@ void					ft_print(t_args *arglist, t_vals *values, t_term *setup)
 		values->lin_pos = 17;
 	else
 		values->lin_pos = 0;
-
 }
 
 void					ft_toggle_sel(t_args *arglist, t_vals *values)
@@ -139,9 +161,9 @@ void					ft_toggle_sel(t_args *arglist, t_vals *values)
 	values->curr += 1;
 }
 
-void					ft_movement(t_args *arglist, int buf, t_term *setup, t_vals *values)
+void					ft_arrows(t_args *arglist, int buf, t_term *setup,
+						t_vals *values)
 {
-	(void)setup;
 	if (buf == 4348699)
 	{
 		values->curr += 1;
@@ -156,6 +178,11 @@ void					ft_movement(t_args *arglist, int buf, t_term *setup, t_vals *values)
 		values->curr -= 1;
 		ft_print(arglist, values, setup);
 	}
+}
+
+void					ft_select_elem(t_args *arglist, int buf, t_term *setup,
+						t_vals *values)
+{
 	if (buf == 32)
 	{
 		ft_toggle_sel(arglist, values);
@@ -163,6 +190,13 @@ void					ft_movement(t_args *arglist, int buf, t_term *setup, t_vals *values)
 			values->curr = 0;
 		ft_print(arglist, values, setup);
 	}
+}
+
+void					ft_end(t_args *arglist, int buf, t_term *setup,
+						t_vals *values)
+{
+	(void)values;
+	(void)setup;
 	if (buf == 10)
 	{
 		while (arglist)
@@ -179,6 +213,19 @@ void					ft_movement(t_args *arglist, int buf, t_term *setup, t_vals *values)
 		// tputs(tgetstr("te", NULL), 0, ft_pointchar);
 		exit(EXIT_SUCCESS);
 	}
+	if (buf == 27)
+	{
+		tputs(tgetstr("ve", NULL), 0, ft_pointchar);
+		exit(EXIT_SUCCESS);
+	}
+}
+
+void					ft_events(t_args *arglist, int buf, t_term *setup,
+						t_vals *values)
+{
+	ft_arrows(arglist, buf, setup, values);
+	ft_select_elem(arglist, buf, setup, values);
+	ft_end(arglist, buf, setup, values);
 }
 
 void					ft_display_loop(t_args	*arglist, t_term *setup)
@@ -204,7 +251,7 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 		read(0, &buf, 8);
 		tputs(tgetstr("cl", NULL), 1, ft_pointchar);
 		values->col_pos = 0;
-		ft_movement(arglist, buf, setup, values);
+		ft_events(arglist, buf, setup, values);
 		buf = 0;
 	}
 }
@@ -223,7 +270,8 @@ void					ft_init(char *orterm, t_term *setup, t_args *arglist)
 	tputs(tgetstr("vi", NULL), 1, ft_pointchar);
 	setup->height = tgetnum("li");
  	setup->width = tgetnum("co");
-	setup->to_sub = setup->width;
+	setup->to_sub_w = setup->width;
+	setup->to_sub_h = setup->height;
 	ft_display_loop(arglist, setup);
 }
 

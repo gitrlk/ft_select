@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/17 18:13:26 by jecarol           #+#    #+#             */
-/*   Updated: 2017/05/29 18:30:44 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/05/30 15:23:58 by rlkcmptr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,8 @@ typedef	struct			s_args
 typedef struct			s_term
 {
 	struct termios		attributes;
-	int					to_sub;
+	int					to_sub_w;
+	int					to_sub_h;
 	int					width;
 	int					height;
 }						t_term;
