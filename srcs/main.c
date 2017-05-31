@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/25 17:57:15 by jecarol           #+#    #+#             */
-/*   Updated: 2017/05/30 20:23:14 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/05/31 17:07:06 by jecarol          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -253,11 +253,63 @@ void					ft_end(t_args *arglist, int buf, t_term *setup,
 	}
 }
 
+void					ft_update_pos(t_args *arglist, t_vals *values)
+{
+	t_args				*tmp;
+	int					pos;
+
+	pos = 0;
+	tmp = arglist;
+	while (tmp)
+	{
+		tmp->pos = pos;
+		pos++;
+		tmp = tmp->next;
+	}
+	values->count -= 1;
+}
+
+void					ft_del_elem(t_args *arglist, int buf, t_term *setup,
+						t_vals *values)
+{
+	t_args				*tmp;
+	t_args				*todel;
+
+	if (buf == 127)
+	{
+		tmp = arglist;
+		while (tmp)
+		{
+			todel = tmp->next;
+			if (todel && todel->pos == values->curr)
+			{
+				tmp->next = tmp->next->next;
+				ft_strdel(&todel->name);
+				free(todel);
+				ft_update_pos(arglist, values);
+				if (values->count == values->curr)
+					values->curr = 0;
+			}
+			// if (todel && values->curr == 0 && tmp->pos == 0)
+			// {
+			// 	todel = tmp;
+			// 	arglist = arglist->next;
+			// 	ft_strdel(&todel->name);
+			// 	free(todel);
+			// 	ft_update_pos(arglist, values);
+			// }
+			tmp = tmp->next;
+		}
+		ft_print(arglist, values, setup);
+	}
+}
+
 void					ft_events(t_args *arglist, int buf, t_term *setup,
 						t_vals *values)
 {
 	ft_arrows(arglist, buf, setup, values);
 	ft_select_elem(arglist, buf, setup, values);
+	ft_del_elem(arglist, buf, setup, values);
 	ft_end(arglist, buf, setup, values);
 }
 
@@ -295,7 +347,12 @@ void					ft_init(char *orterm, t_term *setup, t_args *arglist)
 	int					retoor;
 
 	if ((retoor = tgetent(NULL, orterm) < 0))
+	{
 		ft_putendl_fd("error", 2);
+		ft_freelist(arglist);
+		free(setup);
+		exit(EXIT_FAILURE);
+	}
 	tcgetattr(0, &setup->attributes);
 	setup->attributes.c_lflag &= ~ICANON;
 	setup->attributes.c_lflag &= ~ECHO;
