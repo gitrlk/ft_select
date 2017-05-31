@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/25 17:57:15 by jecarol           #+#    #+#             */
-/*   Updated: 2017/05/31 17:07:06 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/05/31 20:20:24 by jecarol          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,6 +152,8 @@ void					ft_print(t_args *arglist, t_vals *values, t_term *setup)
 	t_args				*tmp;
 
 	tmp = arglist;
+	if (!tmp)
+		return ;
 	if (setup->width > 65)
 	{
 		ft_waddup();
@@ -224,16 +226,19 @@ void					ft_select_elem(t_args *arglist, int buf, t_term *setup,
 void					ft_end(t_args *arglist, int buf, t_term *setup,
 						t_vals *values)
 {
+	t_args				*tmp;
+
+	tmp = arglist;
 	if (buf == 10)
 	{
-		while (arglist)
+		while (tmp)
 		{
-			if (arglist->sel == 1)
+			if (tmp->sel == 1)
 			{
-				ft_putstr_fd(arglist->name, 1);
+				ft_putstr_fd(tmp->name, 1);
 				ft_putstr_fd(" ", 1);
 			}
-			arglist = arglist->next;
+			tmp = tmp->next;
 		}
 		ft_putchar('\n');
 		tputs(tgetstr("ve", NULL), 0, ft_pointchar);
@@ -260,6 +265,8 @@ void					ft_update_pos(t_args *arglist, t_vals *values)
 
 	pos = 0;
 	tmp = arglist;
+	if (!tmp)
+		return ;
 	while (tmp)
 	{
 		tmp->pos = pos;
@@ -269,7 +276,17 @@ void					ft_update_pos(t_args *arglist, t_vals *values)
 	values->count -= 1;
 }
 
-void					ft_del_elem(t_args *arglist, int buf, t_term *setup,
+void					ft_end_backspace(t_term *setup,
+						t_vals *values)
+{
+	free(setup);
+	free(values);
+	tputs(tgetstr("ve", NULL), 0, ft_pointchar);
+	exit(EXIT_SUCCESS);
+
+}
+
+void					ft_del_elem(t_args **arglist, int buf, t_term *setup,
 						t_vals *values)
 {
 	t_args				*tmp;
@@ -277,40 +294,43 @@ void					ft_del_elem(t_args *arglist, int buf, t_term *setup,
 
 	if (buf == 127)
 	{
-		tmp = arglist;
+		tmp = *arglist;
 		while (tmp)
 		{
 			todel = tmp->next;
-			if (todel && todel->pos == values->curr)
+			if (values->curr == 0 && tmp->pos == 0)
+			{
+				todel = *arglist;
+				*arglist = (*arglist)->next;
+				ft_strdel(&todel->name);
+				free(todel);
+				tmp = *arglist;
+				ft_update_pos(*arglist, values);
+			}
+			else if (todel && todel->pos == values->curr)
 			{
 				tmp->next = tmp->next->next;
 				ft_strdel(&todel->name);
 				free(todel);
-				ft_update_pos(arglist, values);
+				ft_update_pos(*arglist, values);
 				if (values->count == values->curr)
 					values->curr = 0;
 			}
-			// if (todel && values->curr == 0 && tmp->pos == 0)
-			// {
-			// 	todel = tmp;
-			// 	arglist = arglist->next;
-			// 	ft_strdel(&todel->name);
-			// 	free(todel);
-			// 	ft_update_pos(arglist, values);
-			// }
+			if (*arglist == NULL)
+				ft_end_backspace(setup, values);
 			tmp = tmp->next;
 		}
-		ft_print(arglist, values, setup);
+		ft_print(*arglist, values, setup);
 	}
 }
 
-void					ft_events(t_args *arglist, int buf, t_term *setup,
+void					ft_events(t_args **arglist, int buf, t_term *setup,
 						t_vals *values)
 {
-	ft_arrows(arglist, buf, setup, values);
-	ft_select_elem(arglist, buf, setup, values);
+	ft_arrows(*arglist, buf, setup, values);
+	ft_select_elem(*arglist, buf, setup, values);
 	ft_del_elem(arglist, buf, setup, values);
-	ft_end(arglist, buf, setup, values);
+	ft_end(*arglist, buf, setup, values);
 }
 
 void					ft_display_loop(t_args	*arglist, t_term *setup)
@@ -337,7 +357,7 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 		read(0, &buf, 8);
 		tputs(tgetstr("cl", NULL), 1, ft_pointchar);
 		values->col_pos = 0;
-		ft_events(arglist, buf, setup, values);
+		ft_events(&arglist, buf, setup, values);
 		buf = 0;
 	}
 }
