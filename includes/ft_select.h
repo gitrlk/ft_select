@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/17 18:13:26 by jecarol           #+#    #+#             */
-/*   Updated: 2017/05/31 15:58:53 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/06/01 16:37:12 by jecarol          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ typedef	struct			s_vals
 	size_t				max;
 	int					curr;
 	int					count;
+	int					total;
+	int					result;
 }						t_vals;
 
 typedef	struct			s_args
@@ -48,6 +50,7 @@ typedef struct			s_term
 	int					to_sub_h;
 	int					width;
 	int					height;
+	int					fit;
 }						t_term;
 
 #endif
