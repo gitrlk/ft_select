@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/25 17:57:15 by jecarol           #+#    #+#             */
-/*   Updated: 2017/06/01 19:33:27 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/06/01 20:12:47 by jecarol          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,22 +125,25 @@ void					ft_waddup(void)
 	ft_putendl_fd("            `----'              `----'      `---`", 0);
 }
 
+void					ft_padd_waddup(t_vals *values, t_term *setup, int checker)
+{
+	values->col_pos += values->max + 3;
+	values->lin_pos = 17;
+	values->total = setup->height - 17;
+	if (!checker)
+	{
+		setup->to_sub_w -= values->col_pos;
+		if (setup->to_sub_w < 0 || setup->to_sub_w < values->col_pos + 3)
+			setup->fit = 0;
+		else
+			setup->fit = 1;
+	}
+}
+
 void					ft_padder(t_vals *values, t_term *setup, int checker)
 {
 	if (values->lin_pos == setup->height && setup->width > 65)
-	{
-		values->col_pos += values->max + 3;
-		values->lin_pos = 17;
-		values->total = setup->height - 17;
-		if (!checker)
-		{
-			setup->to_sub_w -= values->col_pos;
-			if (setup->to_sub_w < 0 || setup->to_sub_w < values->col_pos + 3)
-				setup->fit = 0;
-			else
-				setup->fit = 1;
-		}
-	}
+		ft_padd_waddup(values, setup, checker);
 	else if (values->lin_pos == setup->height)
 	{
 		values->col_pos += values->max + 3;
@@ -210,7 +213,7 @@ void					ft_toggle_sel(t_args *arglist, t_vals *values)
 	values->curr += 1;
 }
 
-void					ft_arrows(t_args *arglist, int buf, t_term *setup,
+void					ft_up_down(t_args *arglist, int buf, t_term *setup,
 						t_vals *values)
 {
 	if (buf == 4348699)
@@ -227,6 +230,11 @@ void					ft_arrows(t_args *arglist, int buf, t_term *setup,
 		values->curr -= 1;
 		ft_print(arglist, values, setup);
 	}
+}
+
+void					ft_left_right(t_args *arglist, int buf, t_term *setup,
+						t_vals *values)
+{
 	if (buf == 4479771)
 	{
 		if (values->curr > values->total || values->curr == values->total)
@@ -247,6 +255,13 @@ void					ft_arrows(t_args *arglist, int buf, t_term *setup,
 	}
 }
 
+void					ft_arrows(t_args *arglist, int buf, t_term *setup,
+						t_vals *values)
+{
+	ft_up_down(arglist, buf, setup, values);
+	ft_left_right(arglist, buf, setup, values);
+}
+
 void					ft_select_elem(t_args *arglist, int buf, t_term *setup,
 						t_vals *values)
 {
@@ -257,6 +272,15 @@ void					ft_select_elem(t_args *arglist, int buf, t_term *setup,
 			values->curr = 0;
 		ft_print(arglist, values, setup);
 	}
+}
+
+void					ft_free_that_shiet(t_args *arglist, t_vals *values, t_term *setup)
+{
+	ft_freelist(arglist);
+	free(setup);
+	free(values);
+	tputs(tgetstr("ve", NULL), 0, ft_pointchar);
+	exit(EXIT_SUCCESS);
 }
 
 void					ft_end(t_args *arglist, int buf, t_term *setup,
@@ -279,19 +303,9 @@ void					ft_end(t_args *arglist, int buf, t_term *setup,
 		}
 		if (values->result == 1)
 			ft_putchar('\n');
-		tputs(tgetstr("ve", NULL), 0, ft_pointchar);
-		ft_freelist(arglist);
-		free(setup);
-		free(values);
-		exit(EXIT_SUCCESS);
-	}
+		ft_free_that_shiet(arglist, values, setup);
 	if (buf == 27)
-	{
-		free(setup);
-		free(values);
- 		ft_freelist(arglist);
-		tputs(tgetstr("ve", NULL), 0, ft_pointchar);
-		exit(EXIT_SUCCESS);
+		ft_free_that_shiet(arglist, values, setup);
 	}
 }
 
@@ -323,6 +337,28 @@ void					ft_end_backspace(t_term *setup,
 
 }
 
+void					ft_del_first(t_args *todel, t_args **arglist,
+						t_args **tmp, t_vals *values)
+{
+	todel = *arglist;
+	*arglist = (*arglist)->next;
+	ft_strdel(&todel->name);
+	free(todel);
+	*tmp = *arglist;
+	ft_update_pos(*arglist, values);
+}
+
+void					ft_del_any(t_args *todel, t_args **arglist,
+						t_args **tmp, t_vals *values)
+{
+	(*tmp)->next = (*tmp)->next->next;
+	ft_strdel(&todel->name);
+	free(todel);
+	ft_update_pos(*arglist, values);
+	if (values->count == values->curr)
+		values->curr = 0;
+}
+
 void					ft_del_elem(t_args **arglist, int buf, t_term *setup,
 						t_vals *values)
 {
@@ -336,23 +372,9 @@ void					ft_del_elem(t_args **arglist, int buf, t_term *setup,
 		{
 			todel = tmp->next;
 			if (values->curr == 0 && tmp->pos == 0)
-			{
-				todel = *arglist;
-				*arglist = (*arglist)->next;
-				ft_strdel(&todel->name);
-				free(todel);
-				tmp = *arglist;
-				ft_update_pos(*arglist, values);
-			}
+				ft_del_first(todel, arglist, &tmp, values);
 			else if (todel && todel->pos == values->curr)
-			{
-				tmp->next = tmp->next->next;
-				ft_strdel(&todel->name);
-				free(todel);
-				ft_update_pos(*arglist, values);
-				if (values->count == values->curr)
-					values->curr = 0;
-			}
+				ft_del_any(todel, arglist, &tmp, values);
 			if (*arglist == NULL)
 				ft_end_backspace(setup, values);
 			tmp = tmp->next;
@@ -374,6 +396,19 @@ void					ft_events(t_args **arglist, int buf, t_term *setup,
 	ft_end(*arglist, buf, setup, values);
 }
 
+void					ft_set_values(t_vals *values, t_args *arglist,
+						t_term *setup)
+{
+	values->col_pos = 0;
+	values->result = 0;
+	if (setup->width > 65)
+		values->lin_pos = 17;
+	else
+		values->lin_pos = 0;
+	values->curr = 0;
+	ft_getmax(arglist, values);
+}
+
 void					ft_display_loop(t_args	*arglist, t_term *setup)
 {
 	int					buf;
@@ -383,14 +418,7 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 	i = 0;
 	buf = 0;
 	values = ft_memalloc(sizeof(t_vals));
-	values->col_pos = 0;
-	values->result = 0;
-	if (setup->width > 65)
-		values->lin_pos = 17;
-	else
-		values->lin_pos = 0;
-	values->curr = 0;
-	ft_getmax(arglist, values);
+	ft_set_values(values, arglist, setup);
 	tputs(tgetstr("ti", NULL), 0, ft_pointchar);
 	tputs(tgoto(tgetstr("cm", NULL), 0, 0), 1, ft_pointchar);
 	ft_print(arglist, values, setup);
@@ -449,7 +477,11 @@ int						main(int ac, char **av)
 	while (av[++i])
 		ft_getargs(&arglist, av[i]);
 	setup = ft_memalloc(sizeof(t_term));
-	orterm = getenv("TERM");
+	if (!(orterm = getenv("TERM")))
+	{
+		ft_putendl_fd("error : no TERM variable set", 2);
+		exit(EXIT_FAILURE);
+	}
 	ft_init(orterm, setup, arglist);
 	return (0);
 }
