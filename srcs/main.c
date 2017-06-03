@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/25 17:57:15 by jecarol           #+#    #+#             */
-/*   Updated: 2017/06/03 21:13:10 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/06/03 21:50:36 by jecarol          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,9 +254,9 @@ void					ft_end(t_args *arglist, int buf, t_term *setup,
 		if (values->result == 1)
 			ft_putchar('\n');
 		ft_free_that_shiet(arglist, values, setup);
+	}
 	if (buf == 27)
 		ft_free_that_shiet(arglist, values, setup);
-	}
 }
 
 void					ft_update_pos(t_args *arglist, t_vals *values)
@@ -400,6 +400,7 @@ void					ft_sigint(int i)
 void					ft_sigstp(int i)
 {
 	(void)i;
+	tputs(tgetstr("cl", NULL), 1, ft_pointchar);
 	tputs(tgetstr("ve", NULL), 0, ft_pointchar);
 	tputs(tgetstr("te", NULL), 0, ft_pointchar);
 	tcsetattr(0, TCSANOW, &g_term->attributes);
@@ -410,7 +411,9 @@ void					ft_sigstp(int i)
 void					ft_sigcont(int i)
 {
 		(void)i;
+		signal(SIGTSTP, &ft_sigstp);
 		ft_set_term();
+		ft_set_values(g_vals, g_args);
 		ft_print(g_args, g_vals, g_term);
 }
 
@@ -442,14 +445,14 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 	g_args = arglist;
 	g_vals = values;
 	g_term = setup;
-	ft_signal();
 	ft_set_term();
 	ft_print(arglist, values, setup);
+	ft_signal();
 	while (42)
 	{
 		read(0, &buf, 8);
 		values->col_pos = 0;
-		ft_events(&arglist, buf, g_term, values);
+		ft_events(&arglist, buf, setup, values);
 		buf = 0;
 	}
 }
