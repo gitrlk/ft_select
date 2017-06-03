@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/25 17:57:15 by jecarol           #+#    #+#             */
-/*   Updated: 2017/06/01 20:12:47 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/06/03 21:13:10 by jecarol          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,97 +88,42 @@ void					ft_getmax(t_args *arglist, t_vals *values)
 	values->max = max;
 }
 
-void					ft_waddup_more(void)
+void					ft_padder(t_vals *values, t_term *setup, int checker)
 {
-	ft_putstr_fd("                         ", 0);
-	ft_putendl_fd(",--,                                ,----,", 0);
-    ft_putstr_fd("                      ", 0);
-	ft_putendl_fd(",---.'|                              ,/   .`|", 0);
-	ft_putstr_fd("  .--.--.       ,---,.|   | :       ", 0);
-	ft_putendl_fd(",---,.  ,----..      ,`   .'  :", 0);
-	ft_putstr_fd(" /  /    '.   ,'  .' |:   : |     ", 0);
-	ft_putendl_fd(",'  .' | /   /  \\    ;    ;     /", 0);
-	ft_putstr_fd("|  :  /`. / ,---.'   ||   ' :   ", 0);
-	ft_putendl_fd(",---.'   ||   :     :.'___,/    ,'", 0);
-	ft_putstr_fd(";  |  |--`  |   |   .';   ; '   ", 0);
-	ft_putendl_fd("|   |   .'.   |  ;. /|    :     |", 0);
-	ft_putstr_fd("|  :  ;_    :   :  |-,'   | |__ :   ", 0);
-	ft_putendl_fd(":  |-,.   ; /--` ;    |.';  ;", 0);
-	ft_putstr_fd(" \\  \\    `. :   |  ;/||   | :.'|", 0);
-}
-
-void					ft_waddup(void)
-{
-	ft_waddup_more();
-	ft_putendl_fd(":   |  ;/|;   | ;    `----'  |  |", 0);
-	ft_putstr_fd("  `----.   \\|   :   .''   :    ", 0);
-	ft_putendl_fd(";|   :   .'|   : |        '   :  ;", 0);
-	ft_putstr_fd("    __\\ \\  ||   |  |-,|   |  ", 0);
-	ft_putendl_fd("./ |   |  |-,.   | '___     |   |  '", 0);
-    ft_putstr_fd(" /  /`--'  /'   :  ;/|;   : ;   '   :  ", 0);
-	ft_putendl_fd(";/|'   ; : .'|    '   :  |", 0);
-	ft_putstr_fd("'--'.     / |   |    \\|   ,/    ", 0);
-	ft_putendl_fd("|   |    \\'   | '/  :    ;   |.'", 0);
-  	ft_putstr_fd("  `--'---'  |   :   .''---'     ", 0);
-	ft_putendl_fd("|   :   .'|   :    /     '---'", 0);
-  	ft_putendl_fd("            |   | ,'            |   | ,'   \\  \\  .'", 0);
-	ft_putendl_fd("            `----'              `----'      `---`", 0);
-}
-
-void					ft_padd_waddup(t_vals *values, t_term *setup, int checker)
-{
-	values->col_pos += values->max + 3;
-	values->lin_pos = 17;
-	values->total = setup->height - 17;
-	if (!checker)
+	if (values->lin_pos == setup->height)
 	{
-		setup->to_sub_w -= values->col_pos;
-		if (setup->to_sub_w < 0 || setup->to_sub_w < values->col_pos + 3)
+		if (!checker)
+		{
+			setup->to_sub_w -= values->max + 3;
+			if (setup->to_sub_w < 0 ||
+			(setup->to_sub_w < (int)values->max + 3 &&
+			values->lin_pos != setup->height))
+				setup->fit = 0;
+			else
+				setup->fit = 1;
+		}
+		values->col_pos += values->max + 3;
+		values->lin_pos = 0;
+		values->total = setup->height;
+	}
+	else
+	{
+		if (setup->to_sub_w < (int)values->max)
 			setup->fit = 0;
 		else
 			setup->fit = 1;
 	}
 }
 
-void					ft_padder(t_vals *values, t_term *setup, int checker)
-{
-	if (values->lin_pos == setup->height && setup->width > 65)
-		ft_padd_waddup(values, setup, checker);
-	else if (values->lin_pos == setup->height)
-	{
-		values->col_pos += values->max + 3;
-		values->lin_pos = 0;
-		values->total = setup->height;
-		if (!checker)
-		{
-			setup->to_sub_w -= values->col_pos;
-			if (setup->to_sub_w < 0 || setup->to_sub_w < values->col_pos + 3)
-				setup->fit = 0;
-			else
-				setup->fit = 1;
-		}
-	}
-}
-
-void					ft_print_more(t_term *setup, t_vals *values)
-{
-	if (setup->width > 65)
-		values->lin_pos = 17;
-	else
-		values->lin_pos = 0;
-}
-
 void					ft_print(t_args *arglist, t_vals *values, t_term *setup)
 {
 	t_args				*tmp;
-	static int			checker = 0;
+	struct winsize		test;
 
 	tmp = arglist;
-	if (setup->width > 65)
-	{
-		ft_waddup();
-		tputs(tgoto(tgetstr("cm", NULL), 0, 17), 1, ft_pointchar);
-	}
+	ioctl(0, TIOCGWINSZ, &test);
+	setup->width = test.ws_col;
+	setup->height = test.ws_row;
 	while (tmp)
 	{
 		if (values->curr == tmp->pos)
@@ -188,13 +133,18 @@ void					ft_print(t_args *arglist, t_vals *values, t_term *setup)
 		ft_putstr_fd(tmp->name, 0);
 		ft_putstr_fd(tgetstr("me", NULL), 0);
 		values->lin_pos += 1;
-		ft_padder(values, setup, checker);
+		ft_padder(values, setup, g_checker);
 		tputs(tgoto(tgetstr("cm", NULL), values->col_pos, values->lin_pos),
 		1, ft_pointchar);
 		tmp = tmp->next;
 	}
-	ft_print_more(setup, values);
-	checker = 1;
+	values->lin_pos = 0;
+	if (!setup->fit)
+	{
+		tputs(tgetstr("cl", NULL), 1, ft_pointchar);
+		ft_putendl_fd("please enlarge terminal window", 0);
+	}
+	g_checker = 1;
 }
 
 void					ft_toggle_sel(t_args *arglist, t_vals *values)
@@ -396,17 +346,80 @@ void					ft_events(t_args **arglist, int buf, t_term *setup,
 	ft_end(*arglist, buf, setup, values);
 }
 
-void					ft_set_values(t_vals *values, t_args *arglist,
-						t_term *setup)
+void					ft_set_values(t_vals *values, t_args *arglist)
 {
 	values->col_pos = 0;
 	values->result = 0;
-	if (setup->width > 65)
-		values->lin_pos = 17;
-	else
-		values->lin_pos = 0;
+	values->lin_pos = 0;
 	values->curr = 0;
 	ft_getmax(arglist, values);
+}
+
+void					ft_set_term(void)
+{
+	tputs(tgetstr("cl", NULL), 1, ft_pointchar);
+	tputs(tgetstr("vi", NULL), 1, ft_pointchar);
+	g_term->height = tgetnum("li");
+ 	g_term->width = tgetnum("co");
+	g_term->to_sub_w = g_term->width;
+	g_term->to_sub_h = g_term->height;
+	g_term->fit = 1;
+	tcgetattr(0, &g_term->attributes);
+	g_term->attributes.c_lflag &= ~ICANON;
+	g_term->attributes.c_lflag &= ~ECHO;
+	tcsetattr(0, TCSADRAIN, &g_term->attributes);
+}
+
+void					ft_resize(int i)
+{
+	(void)i;
+	struct winsize		testplus;
+	tputs(tgetstr("cl", NULL), 1, ft_pointchar);
+	ioctl(0, TIOCGWINSZ, &testplus);
+	g_term->width = testplus.ws_col;
+	g_term->height = testplus.ws_row;
+	g_term->to_sub_w = g_term->width;
+	g_term->to_sub_h = g_term->height;
+	g_checker = 0;
+	ft_set_values(g_vals, g_args);
+	ft_print(g_args, g_vals, g_term);
+}
+
+void					ft_sigint(int i)
+{
+	(void)i;
+	ft_freelist(g_args);
+	free(g_term);
+	free(g_vals);
+	tputs(tgetstr("ve", NULL), 0, ft_pointchar);
+	tputs(tgetstr("cl", NULL), 1, ft_pointchar);
+	tcsetattr(0, 0, &g_term->attributes);
+	exit(EXIT_SUCCESS);
+}
+
+void					ft_sigstp(int i)
+{
+	(void)i;
+	tputs(tgetstr("ve", NULL), 0, ft_pointchar);
+	tputs(tgetstr("te", NULL), 0, ft_pointchar);
+	tcsetattr(0, TCSANOW, &g_term->attributes);
+	signal(SIGTSTP, SIG_DFL);
+	ioctl(0, TIOCSTI, "\032");
+}
+
+void					ft_sigcont(int i)
+{
+		(void)i;
+		ft_set_term();
+		ft_print(g_args, g_vals, g_term);
+}
+
+void					ft_signal(void)
+{
+	signal(SIGTSTP, ft_sigstp);
+	signal(SIGCONT, ft_sigcont);
+	signal(SIGINT, ft_sigint);
+	signal(SIGWINCH, ft_resize);
 }
 
 void					ft_display_loop(t_args	*arglist, t_term *setup)
@@ -417,21 +430,26 @@ void					ft_display_loop(t_args	*arglist, t_term *setup)
 
 	i = 0;
 	buf = 0;
+	g_checker = 0;
 	values = ft_memalloc(sizeof(t_vals));
-	ft_set_values(values, arglist, setup);
+	ft_set_values(values, arglist);
+	tcgetattr(0, &setup->attributes);
+	setup->attributes.c_lflag &= ~ICANON;
+	setup->attributes.c_lflag &= ~ECHO;
+	tcsetattr(0, TCSADRAIN, &setup->attributes);
 	tputs(tgetstr("ti", NULL), 0, ft_pointchar);
 	tputs(tgoto(tgetstr("cm", NULL), 0, 0), 1, ft_pointchar);
+	g_args = arglist;
+	g_vals = values;
+	g_term = setup;
+	ft_signal();
+	ft_set_term();
 	ft_print(arglist, values, setup);
-	if (!setup->fit)
-	{
-		tputs(tgetstr("cl", NULL), 1, ft_pointchar);
-		ft_putendl_fd("please enlarge terminal window", 0);
-	}
 	while (42)
 	{
 		read(0, &buf, 8);
 		values->col_pos = 0;
-		ft_events(&arglist, buf, setup, values);
+		ft_events(&arglist, buf, g_term, values);
 		buf = 0;
 	}
 }
