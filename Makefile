@@ -6,7 +6,7 @@
 #    By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/05/17 18:17:30 by jecarol           #+#    #+#              #
-#    Updated: 2017/06/03 15:14:48 by jecarol          ###   ########.fr        #
+#    Updated: 2017/06/05 18:16:41 by jecarol          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,8 @@ NAME = ft_select
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -g
 
-SRCS_LIST = main.c
+SRCS_LIST = main.c ft_arrows.c ft_sig_mngmnt.c ft_print_section.c\
+			ft_mng_elements.c ft_core.c ft_setup.c ft_exit.c ft_select_elem.c
 SRCS_DIR = srcs/
 SRCS = $(addprefix $(SRCS_DIR), $(SRCS_LIST))
 
