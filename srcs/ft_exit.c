@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/05 18:14:28 by jecarol           #+#    #+#             */
-/*   Updated: 2017/06/05 18:18:43 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/06/06 03:30:23 by rlkcmptr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,9 @@ void					ft_free_that_shiet(t_args *arglist, t_vals *values,
 						t_term *setup)
 {
 	ft_freelist(arglist);
-	setup->attributes.c_lflag |= ~ICANON;
-	setup->attributes.c_lflag |= ~ECHO;
+	setup->attributes.c_lflag |= ICANON;
+	setup->attributes.c_lflag |= ECHO;
+	tcsetattr(0, 0, &setup->attributes);
 	free(setup);
 	free(values);
 	tputs(tgetstr("ve", NULL), 0, ft_pointchar);

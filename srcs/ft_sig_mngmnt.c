@@ -6,7 +6,7 @@
 /*   By: jecarol <jecarol@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/05 17:43:37 by jecarol           #+#    #+#             */
-/*   Updated: 2017/06/05 18:21:17 by jecarol          ###   ########.fr       */
+/*   Updated: 2017/06/06 03:32:36 by rlkcmptr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,9 @@ void					ft_sigint(int i)
 	free(g_vals);
 	tputs(tgetstr("ve", NULL), 0, ft_pointchar);
 	tputs(tgetstr("cl", NULL), 1, ft_pointchar);
-	g_term->attributes.c_lflag |= ~ICANON;
-	g_term->attributes.c_lflag |= ~ECHO;
+	tputs(tgetstr("te", NULL), 0, ft_pointchar);
+	g_term->attributes.c_lflag |= ICANON;
+	g_term->attributes.c_lflag |= ECHO;
 	tcsetattr(0, 0, &g_term->attributes);
 	exit(EXIT_SUCCESS);
 }
@@ -66,6 +67,9 @@ void					ft_segvwtf(int i)
 {
 	(void)i;
 	tputs(tgetstr("cl", NULL), 1, ft_pointchar);
+	tputs(tgetstr("ve", NULL), 0, ft_pointchar);
+	tputs(tgetstr("te", NULL), 0, ft_pointchar);
+	tcsetattr(0, TCSANOW, &g_term->attributes);
 	ft_putendl_fd("IMPOSSIBRUU", 2);
 	exit(EXIT_FAILURE);
 }
